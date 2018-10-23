@@ -6,7 +6,7 @@
 function milter_hook(ctx)
 
     local subject = ""
-    -- Устанавливаем переменной modifier, функцию для осуществления модификаций
+    -- Устанавливаем переменной modifier, таблицу для осуществления модификаций
     -- Set the variable modifier, the function for implementing the modifications
     local modifier = ctx.modifier
 
