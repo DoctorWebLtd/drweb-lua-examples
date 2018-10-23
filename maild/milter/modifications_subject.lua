@@ -1,14 +1,10 @@
---
--- Created by IntelliJ IDEA.
--- User: a.morokov
---
 
 function milter_hook(ctx)
 
     local subject = ""
-    -- Устанавливаем переменной modifier, функцию для осуществления модификаций
+    -- Устанавливаем переменной modifier, таблицу для осуществления модификаций
     -- Set the variable modifier, the function for implementing the modifications
-    local modifier = ctx.modifier()
+    local modifier = ctx.modifier
 
     -- Получаем тему письма из заголовков
     -- Get the subject of the message from the headers

@@ -1,7 +1,3 @@
---
--- Created by IntelliJ IDEA.
--- User: a.morokov
---
 
 function milter_hook(ctx)
     -- Если сообщение содержит определенные типы угроз то отвергаем его
