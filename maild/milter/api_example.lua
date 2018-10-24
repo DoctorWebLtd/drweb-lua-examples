@@ -147,6 +147,26 @@ function milter_hook(ctx)
         end
     end
 
+
+    --
+    -- Then we can check message for a legit consistence
+
+    -- If message contains url with specified category reject it
+    if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
+        return {action = "reject", message = "Detected url with bad content!"}
+    end
+
+    -- If message contains attachs check
+    if ctx.message.has_file() then
+        -- If attachs extensions matchs rar|zip|7z accept it, else reject
+        if ctx.message.has_file{name_re = '.*(rar|zip|7z)'} then
+            return {action = "accept"}
+        else
+            return {action = "reject", message = "Only archieve attaches allowed(zip|rar|7z)"}
+        end
+    end
+
+
     --
     -- Then we can modificate message
 
@@ -173,7 +193,11 @@ function milter_hook(ctx)
         modifier.change_header_field("Subject", new_value)
         -- Add additional header with spamscore
         modifier.add_header_field("X-Spam-Score", ctx.message.spam.score)
+        modifier.repack_message = "This message was recognized as Spam"
+        -- Repack the whole message
+        modifier.repack()
     end
+
 
     -- Hook must return response to SMTP server
         -- Responses:
