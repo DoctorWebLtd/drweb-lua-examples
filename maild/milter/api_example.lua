@@ -179,6 +179,8 @@ function milter_hook(ctx)
         modifier.change_header_field("Subject", new_value)
         -- Plan to add new header with spam score
         modifier.add_header_field("X-Spam-Score", ctx.message.spam.score)
+        modifier.repack_password = "The message was recognized as spam"
+        modifier.repack()
     end
 
   -- The hook function must return response to SMTP server.
