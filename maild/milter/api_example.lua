@@ -1,114 +1,104 @@
 --
--- Maild 11.1 Lua rules processing
--- Short api summary
+-- Rules for email messages processing in Lua used by Dr.Web MailD 11.1
+-- Short MailD Lua API summary (for Milter protocol)
 --
 
--- Provided modules
-local drweb = require "drweb"           -- common utilities
-                                            -- dwreb.log(level, message)
-                                            -- dwreb.debug("this is a debugging message")
-                                            -- dwreb.info("this is an informational message")
-                                            -- dwreb.notice("this is an notice message")
-                                            -- dwreb.warning("this is a warning message")
-                                            -- dwreb.error("this is an error message")
-                                            -- dwreb.sleep(time)
-                                            -- dwreb.async(func)
-local dns = require "drweb.dnsxl"       -- functions to get access to dnsxl и surbl servers
-                                            -- dns.ip(ip_address, dnsxl_server)
-                                            -- dns.url(url, surbl_server)
-local lookup = require "drweb.lookup"   -- functions to get access to external storages (AD, ldap, ... etc)
-                                            -- lookup.lookup(request, parameters)
+-- Provided auxiliary modules
+local drweb = require "drweb"
+  -- Common utilities
+     -- drweb.log(level, message)
+     -- drweb.debug("this is a debug message")
+     -- drweb.info("this is an info message")
+     -- drweb.notice("this is an notice message")
+     -- drweb.warning("this is a warning message")
+     -- drweb.error("this is an error message")
+     -- drweb.sleep(time) -- pause execution for time seconds
+     -- drweb.async(func) -- async start of specified function
 
--- Mandatory function name.
+local dns = require "drweb.dnsxl"
+  -- Contains functions to check IP (URL) on DNSxL  (SURBL) servers
+     -- dns.ip(ip_address, dnsxl_server)
+     -- dns.url(url, surbl_server)
+
+local lookup = require "drweb.lookup"
+-- Contains function to get data from external storages via LookupD (AD, ldap, ... etc)
+     -- lookup.lookup(request, parameters)
+
+-- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
 function milter_hook(ctx)
-    -- In Lua, object-oriented programming is implemented using tables.
-    -- More about table type you can read here: https://www.lua.org/pil/2.5.html
-    -- Argument: ctx (MilterContext) message sent to the drweb-maild by Milter protocol
-    -- Provide --
-    -- ctx ->
-            -- sender       (table)
-            -- helo         (string)
-            -- from         (string)
-            -- to           (array)
-            -- message      (table)
-            -- modifier     (table)
+  -- In Lua, object-oriented programming is implemented using tables.
+  -- More about tables you can read here: https://www.lua.org/pil/2.5.html
+  -- Argument ctx (MilterContext) describes the email message to check
+  -- ctx provides the following fields:
+       -- sender    (table)            -- sender of the message
+           -- hostname     (string)
+           -- family       (string)
+           -- port         (int)
+           -- ip           (table)
+       -- helo      (string)            -- HELO information
+       -- from      (string)            -- sender' email address
+       -- to        (array of strings)  -- recipient email addresses
+       -- message   (table)             -- email message to check
+           -- raw          (string)
+           -- spam         (table)
+           -- header       (table)
+               -- field       (array of tables)
+               -- search      (function)
+               -- value       (function)
+           -- body         (table MimeBody)
+               -- raw         (string)
+               -- decoded     (string)
+               -- text        (string)
+               -- scan_report (table)
+               -- url         (array of tables)
+               -- search      (function)
+               -- md5         (string)
+               -- sha1        (string)
+               -- sha256      (string)
+           -- part         (array of tables)
+               -- header      (table)
+               -- body        (table)
+               -- part        (array of tables)
+               -- name        (string)
+               -- search      (function)
+               -- part_at     (function)
+               -- files       (function)
+               -- parts       (function)
+               -- attachments (function)
+               -- leaf_parts  (function)
+               -- text_parts  (function)
+               -- threats     (function)
+               -- urls        (function)
+               -- has_file    (function)
+               -- has_part    (function)
+               -- has_threat  (function)
+               -- has_url     (function)
+           -- name         (string)
+           -- search       (function)
+           -- part_at      (function)
+           -- files        (function)
+           -- parts        (function)
+           -- attachments  (function)
+           -- leaf_parts   (function)
+           -- text_parts   (function)
+           -- threats      (function)
+           -- urls         (function)
+           -- has_file     (function)
+           -- has_part     (function)
+           -- has_threat   (function)
+           -- has_url      (function)
+       -- modifier  (table)             -- modifications to be applied to the message
+           -- add_header_field     (function)
+           -- change_header_field  (function)
+           -- modifications        (function)
+           -- repack               (function)
+           -- repack_password      (string)
+           -- repack_message       (string)
+           -- templates_dir        (string)
 
-                -- sender ->
-                    -- hostname             (string)
-                    -- family               (string)
-                    -- port                 (int)
-                    -- ip                   (table)
+  -- Now we can see the information we are interested in about the message.
 
-                -- message (MimeMessage) ->
-                    -- raw                  (string)
-                    -- spam                 (table)
-                    -- header               (table)             (MimeHeader)
-                    -- body                 (table)             (MimeBody)
-                    -- part                 (array of tables)   (MimePart)
-                    -- name                 (string)
-                    -- search               (function)
-                    -- part_at              (function)
-                    -- files                (function)
-                    -- parts                (function)
-                    -- attachments          (function)
-                    -- leaf_parts           (function)
-                    -- text_parts           (function)
-                    -- threats              (function)
-                    -- urls                 (function)
-                    -- has_file             (function)
-                    -- has_part             (function)
-                    -- has_threat           (function)
-                    -- has_url              (function)
-
-                -- modifier ->
-                    -- add_header_field     (function)
-                    -- change_header_field  (function)
-                    -- modifications        (function)
-                    -- repack               (function)
-                    -- repack_password      (string)
-                    -- repack_message       (string)
-                    -- templates_dir        (string)
-
-                        -- header (MimeHeader) ->
-                            -- field                (array of tables)
-                            -- search               (function)
-                            -- value                (function)
-
-                        -- body (MimeBody) ->
-                            -- raw                  (string)
-                            -- decoded              (string)
-                            -- text                 (string)
-                            -- scan_report          (table)
-                            -- url                  (array of tables)
-                            -- search               (function)
-                            -- md5                  (string)
-                            -- sha1                 (string)
-                            -- sha256               (string)
-
-                        -- part (MimePart) ->
-                            -- header               (table)
-                            -- body                 (table)
-                            -- part                 (array of tables)
-                            -- name                 (string)
-                            -- search               (function)
-                            -- part_at              (function)
-                            -- files                (function)
-                            -- parts                (function)
-                            -- attachments          (function)
-                            -- leaf_parts           (function)
-                            -- text_parts           (function)
-                            -- threats              (function)
-                            -- urls                 (function)
-                            -- has_file             (function)
-                            -- has_part             (function)
-                            -- has_threat           (function)
-                            -- has_url              (function)
-
-
-    --
-    -- Now we can see the information we are interested in about the message.
-
-    -- Logging messages in maild.log on level "notice"
+    -- Output message data to log of Dr.Web MailD on level "notice"
     drweb.notice("SMTP HELO/EHLO: " .. ctx.helo)
     drweb.notice("SMTP MAIL FROM: " .. ctx.from)
 
@@ -118,13 +108,13 @@ function milter_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of rcpts
+    -- Iterate throw array of recepients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
     end
 
-    -- If message type not multipart print headers and body
+    -- If message type is not multipart, output headers and body
     if #ctx.message.part == 0 then
         drweb.notice("Message HEADERS:")
         local headers = ctx.message.header.field
@@ -133,7 +123,7 @@ function milter_hook(ctx)
         end
         drweb.notice("Message BODY:")
         drweb.notice(" -> " .. ctx.message.body.raw)
-    -- Else disassemble in parts
+    -- Else disassemble it in parts
     else
         drweb.notice("Message parts:")
         for index, part in ipairs(ctx.message.part) do
@@ -147,9 +137,7 @@ function milter_hook(ctx)
         end
     end
 
-
-    --
-    -- Then we can check message for a legit consistence
+  -- Then we can check message for a legit consistence
 
     -- If message contains url with specified category reject it
     if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
@@ -166,45 +154,42 @@ function milter_hook(ctx)
         end
     end
 
+  -- Then we can analyze and modify ('repack') the message
 
-    --
-    -- Then we can modificate message
-
-    -- Set the variable modifier, the function for implementing the modifications
+    -- Set the modifier variable containing the functions for implementing the modifications
     local modifier = ctx.modifier
-    -- Set the password on repacked message
+    -- Set the password for protected archive containing malicious parts of the message
     modifier.repack_password = "qwerty"
-    -- Set the repacked message
+    -- Set the text to be added to repacked message
     modifier.repack_message = ""
 
-    -- Place all parts into the password-protected archive where threats was found
+    -- Place all parts containing threats into the password-protected archive
     for threat, path in ctx.message.threats() do
         modifier.repack(path)
         local msg = " Threat found: " .. threat.name
         modifier.repack_message = modifier.repack_message .. msg
     end
 
-    -- Check the message for spam and modificate it if the spam points exceed 100
+    -- Check the message for spam and modify it, if spam score is exceed 100
     if ctx.message.spam.score > 100 then
-        -- Find Subject header and get it value
+        -- Modify value of Subject header
         local old_value = ctx.message.header.value("Subject") or ""
         local new_value = "[SPAM] " .. old_value
-        -- Modificate Subject at our discretion
+        -- Plan to set new value for Subject header
         modifier.change_header_field("Subject", new_value)
-        -- Add additional header with spamscore
+        -- Plan to add new header with spam score
         modifier.add_header_field("X-Spam-Score", ctx.message.spam.score)
-        modifier.repack_message = "This message was recognized as Spam"
-        -- Repack the whole message
-        modifier.repack()
     end
 
+  -- The hook function must return response to SMTP server.
+  -- If the response is 'accept' and there are scheduled modifications,
+  -- the hook function should return them in order to they are applied.
+    return {action = "accept", modifications = modifier.modifications()}
 
-    -- Hook must return response to SMTP server
-        -- Responses:
-    return {action = "accept"}
+    -- Available responses are:
     -- return {action = "accept"}
     -- return {action = "reject"}
     -- return {action = "discard"}
     -- return {action = "tempfail"}
-    -- return {action = "replycode", code = "450", text = "response: are you serious?"}
+    -- return {action = "replycode", code = "450", text = "response: Are you serious?"}
 end
