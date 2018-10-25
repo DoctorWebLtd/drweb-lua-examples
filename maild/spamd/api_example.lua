@@ -146,7 +146,7 @@ function spamd_report_hook(ctx)
         return {
             score = ctx.message.spam.score,
             threshold = 100,
-            report = "The message was recognized as spam"
+            report = "Spam message"
         }
     end
 
