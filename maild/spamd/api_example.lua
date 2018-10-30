@@ -1,6 +1,6 @@
 --
 -- Rules for email messages processing in Lua used by Dr.Web MailD 11.1
--- Short MailD Lua API summary (for Milter protocol)
+-- Short MailD Lua API summary (for Spamd protocol)
 --
 
 -- Provided auxiliary modules
@@ -21,14 +21,14 @@ local dns = require "drweb.dnsxl"
      -- dns.url(url, surbl_server)
 
 local lookup = require "drweb.lookup"
--- Contains function to get data from external storages via LookupD (AD, ldap, ... etc)
+-- Contains function to get data from external storages via LookupD (AD, LDAP, ..., etc.)
      -- lookup.lookup(request, parameters)
 
--- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
+-- Entry point to check email message sent to the Dr.Web MailD by Spamd protocol
 function spamd_report_hook(ctx)
   -- In Lua, object-oriented programming is implemented using tables.
   -- More about tables you can read here: https://www.lua.org/pil/2.5.html
-  -- Argument ctx (MilterContext) describes the email message to check
+  -- Argument ctx (SpamdContext) describes the email message to check
   -- ctx provides the following fields:
        -- message   (table)             -- email message to check
            -- raw          (string)
@@ -92,7 +92,7 @@ function spamd_report_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recepients
+    -- Iterate throw array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -123,38 +123,38 @@ function spamd_report_hook(ctx)
 
   -- Then we can check message for a legit consistence
 
-    -- If message contains url with specified category reject it
+    -- If the message contains an URL from any of specified categories, reject it (return the score exceed the threshold)
     if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
         return {
         score = 200,
         threshold = 100,
-        report = "Bad Url"
+        report = "The message contains unwanted URL(s)"
     }
     end
 
-    -- Place all parts containing threats into the password-protected archive
+    -- If the message contains any threats, reject it (return the score exceed the threshold)
     if ctx.message.has_threats() then
         return {
         score = 900,
         threshold = 100,
-        report = "Threats found"
+        report = "The message contains threat(s)"
     }
     end
 
-    -- Check the message for spam and modify it, if spam score is exceed 100
+    -- Check the message for spam and reject it, if spam score is exceed 100 (return the score exceed the threshold)
     if ctx.message.spam.score > 100 then
         return {
             score = ctx.message.spam.score,
             threshold = 100,
-            report = "Spam message"
+            report = "The message was recognized as spam"
         }
     end
 
-    -- The hook function must return report to SMTP server.
+    -- The hook function must return to MTA: spam score, spam threshold and string report.
     return {
         score = ctx.message.spam.score,
         threshold = 100,
-        report = "Clean"
+        report = "The message is clean"
     }
 
 end
