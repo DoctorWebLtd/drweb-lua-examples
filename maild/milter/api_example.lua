@@ -21,7 +21,7 @@ local dns = require "drweb.dnsxl"
      -- dns.url(url, surbl_server)
 
 local lookup = require "drweb.lookup"
--- Contains function to get data from external storages via LookupD (AD, ldap, ... etc)
+-- Contains function to get data from external storages via LookupD (AD, LDAP, ..., etc.)
      -- lookup.lookup(request, parameters)
 
 -- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
@@ -108,7 +108,7 @@ function milter_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recepients
+    -- Iterate throw array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -139,18 +139,18 @@ function milter_hook(ctx)
 
   -- Then we can check message for a legit consistence
 
-    -- If message contains url with specified category reject it
+    -- If the message contains an URL from any of specified categories, reject it
     if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
         return {action = "reject", message = "Detected url with bad content!"}
     end
 
-    -- If message contains attachs check
+    -- If the message contains attachments, check them
     if ctx.message.has_file() then
-        -- If attachs extensions matchs rar|zip|7z accept it, else reject
+        -- If attachment extension is .rar, .zip or .7z, accept the message, else reject
         if ctx.message.has_file{name_re = '.*(rar|zip|7z)'} then
             return {action = "accept"}
         else
-            return {action = "reject", message = "Only archieve attaches allowed(zip|rar|7z)"}
+            return {action = "reject", message = "Only archive (zip|rar|7z) attachments are allowed"}
         end
     end
 
@@ -183,7 +183,7 @@ function milter_hook(ctx)
         modifier.repack()
     end
 
-  -- The hook function must return response to SMTP server.
+  -- The hook function must return response to MTA.
   -- If the response is 'accept' and there are scheduled modifications,
   -- the hook function should return them in order to they are applied.
     return {action = "accept", modifications = modifier.modifications()}
