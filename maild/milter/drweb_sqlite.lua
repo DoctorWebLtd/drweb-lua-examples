@@ -1,12 +1,12 @@
 --
--- Provided auxiliary modules
+-- Auxiliary Dr.Web Lua module providing common utilities
 local drweb = require "drweb"
--- lua module to work with sqlite3 (installed by drweb-luarocks)
+-- Lua module to work with SQLite3 (installed by drweb-luarocks)
 sqlite3 = require "lsqlite3"
--- database file location
+-- SQLite database file location
 local database = '/tmp/drweb.db'
 
--- function to add row about threat to sqlite database
+-- Function to add record about a threat to SQLite database
 local function db_threat_add(date, host, ip, mail_from, mail_to, threat_name, threat_type)
     local db = sqlite3.open(database)
 
@@ -27,7 +27,7 @@ local function db_threat_add(date, host, ip, mail_from, mail_to, threat_name, th
     db:close()
 end
 
--- function to add row about spam to sqlite database
+-- Function to add record about spam to SQLite database
 local function db_spam_add(date, host, ip, mail_from, mail_to, spam_score)
     local db = sqlite3.open(database)
 
@@ -51,7 +51,8 @@ end
 function milter_hook(ctx)
 
     local rcpts = {}
-    -- Iterate throw array of recepients
+
+    -- Iterate throw array of recipients
     for _, rcpt in ipairs(ctx.to) do
         table.insert(rcpts, rcpt)
     end
@@ -62,6 +63,7 @@ function milter_hook(ctx)
     local ip = ctx.sender.ip
     local mail_to = table.concat(rcpts, ", ")
 
+    -- Insert info about each found threat into database and reject the message
     if ctx.message.has_threat() then
         for threat, path in ctx.message.threats() do
             db_threat_add(datetime, host, ip, mail_from, mail_to, threat.name, threat.type)
@@ -69,9 +71,12 @@ function milter_hook(ctx)
         return {action = "reject"}
     end
 
+    -- Insert info about spam into database (if spam score is great than 100) and reject the message
     if ctx.message.spam.score >= 100 then
         db_spam_add(datetime, host, ip, mail_from, mail_to, ctx.message.spam.score)
         return {action = "reject"}
     end
+
+    -- Accept, if the message is not spam and there are no threats found
     return{action = "accept"}
 end

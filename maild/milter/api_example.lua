@@ -21,7 +21,7 @@ local dns = require "drweb.dnsxl"
      -- dns.url(url, surbl_server)
 
 local lookup = require "drweb.lookup"
--- Contains function to get data from external storages via LookupD (AD, ldap, ... etc)
+-- Contains function to get data from external storages via LookupD (AD, LDAP, ..., etc.)
      -- lookup.lookup(request, parameters)
 
 -- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
@@ -108,7 +108,7 @@ function milter_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recepients
+    -- Iterate throw array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -139,7 +139,7 @@ function milter_hook(ctx)
 
   -- Then we can check message for a legit consistence
 
-    -- If message contains url with specified category reject it
+    -- If the message contains an URL from any of specified categories, reject it
     if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
         return {action = "reject", message = "Detected url with bad content!"}
     end
@@ -178,7 +178,7 @@ function milter_hook(ctx)
         modifier.repack()
     end
 
-  -- The hook function must return response to SMTP server.
+  -- The hook function must return response to MTA.
   -- If the response is 'accept' and there are scheduled modifications,
   -- the hook function should return them in order to they are applied.
     return {action = "accept", modifications = modifier.modifications()}
