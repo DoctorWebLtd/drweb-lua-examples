@@ -144,14 +144,9 @@ function milter_hook(ctx)
         return {action = "reject", message = "Detected url with bad content!"}
     end
 
-    -- If the message contains attachments, check them
-    if ctx.message.has_file() then
-        -- If attachment extension is .rar, .zip or .7z, accept the message, else reject
-        if ctx.message.has_file{name_re = '.*(rar|zip|7z)'} then
-            return {action = "accept"}
-        else
-            return {action = "reject", message = "Only archive (zip|rar|7z) attachments are allowed"}
-        end
+    -- If attachs extensions matchs rar|zip|7z accept it, else reject
+    for file, path in ctx.message.attachments{name_re_not = [[.*\.(rar|zip|7z)]]} do
+        return {action = "reject", message = "Only archieve attaches allowed(zip|rar|7z)" }
     end
 
   -- Then we can analyze and modify ('repack') the message
