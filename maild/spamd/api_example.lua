@@ -133,7 +133,7 @@ function spamd_report_hook(ctx)
     end
 
     -- If the message contains any threats, reject it (return the score exceed the threshold)
-    if ctx.message.has_threats() then
+    if ctx.message.has_threat() then
         return {
         score = 900,
         threshold = 100,
