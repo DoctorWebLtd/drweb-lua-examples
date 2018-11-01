@@ -108,7 +108,7 @@ function milter_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recipients
+    -- Iterate through array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)

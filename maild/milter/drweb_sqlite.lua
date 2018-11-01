@@ -52,7 +52,7 @@ function milter_hook(ctx)
 
     local rcpts = {}
 
-    -- Iterate throw array of recipients
+    -- Iterate through array of recipients
     for _, rcpt in ipairs(ctx.to) do
         table.insert(rcpts, rcpt)
     end
