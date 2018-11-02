@@ -92,7 +92,7 @@ function spamd_report_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recipients
+    -- Iterate through array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -123,7 +123,7 @@ function spamd_report_hook(ctx)
 
   -- Then we can check message for a legit consistence
 
-    -- If the message contains an URL from any of specified categories, reject it (return the score exceed the threshold)
+    -- If the message contains an URL from any of specified categories, reject it (return the score that exceed the threshold)
     if ctx.message.has_url{category = {"adult_content", "social_networks"}} then
         return {
         score = 200,
@@ -132,7 +132,7 @@ function spamd_report_hook(ctx)
     }
     end
 
-    -- If the message contains any threats, reject it (return the score exceed the threshold)
+    -- If the message contains any threats, reject it (return the score that exceed the threshold)
     if ctx.message.has_threat() then
         return {
         score = 900,
@@ -141,7 +141,7 @@ function spamd_report_hook(ctx)
     }
     end
 
-    -- Check the message for spam and reject it, if spam score is exceed 100 (return the score exceed the threshold)
+    -- Check the message for spam and reject it, if spam score is exceed 100 (return the score that exceed the threshold)
     if ctx.message.spam.score > 100 then
         return {
             score = ctx.message.spam.score,

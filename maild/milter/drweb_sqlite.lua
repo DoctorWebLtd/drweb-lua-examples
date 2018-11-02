@@ -1,7 +1,7 @@
 --
 -- Auxiliary Dr.Web Lua module providing common utilities
 local drweb = require "drweb"
--- Lua module to work with SQLite3 (installed by drweb-luarocks)
+-- Lua module to work with SQLite3 (installed with drweb-luarocks)
 sqlite3 = require "lsqlite3"
 -- SQLite database file location
 local database = '/tmp/drweb.db'
@@ -52,7 +52,7 @@ function milter_hook(ctx)
 
     local rcpts = {}
 
-    -- Iterate throw array of recipients
+    -- Iterate through array of recipients
     for _, rcpt in ipairs(ctx.to) do
         table.insert(rcpts, rcpt)
     end
@@ -71,7 +71,7 @@ function milter_hook(ctx)
         return {action = "reject"}
     end
 
-    -- Insert info about spam into database (if spam score is great than 100) and reject the message
+    -- Insert info about spam into database (if spam score exceeds 100) and reject the message
     if ctx.message.spam.score >= 100 then
         db_spam_add(datetime, host, ip, mail_from, mail_to, ctx.message.spam.score)
         return {action = "reject"}

@@ -108,7 +108,7 @@ function milter_hook(ctx)
     drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recipients
+    -- Iterate through array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -165,7 +165,7 @@ function milter_hook(ctx)
         modifier.repack_message = modifier.repack_message .. msg
     end
 
-    -- Check the message for spam and modify it, if spam score is exceed 100
+    -- Check the message for spam and modify it, if spam score exceeds 100
     if ctx.message.spam.score > 100 then
         -- Modify value of Subject header
         local old_value = ctx.message.header.value("Subject") or ""
