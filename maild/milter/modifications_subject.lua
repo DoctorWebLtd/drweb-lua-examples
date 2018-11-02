@@ -20,7 +20,7 @@ function milter_hook(ctx)
         return {action = "reject"}
     end
     -- Проверяем письмо на спам, и отвергаем его, если число баллов спама превышает 100
-    -- Reject the message if it is likely spam (i.e. if spam score is great than 100)
+    -- Reject the message if it is likely spam (i.e. if spam score exceeds 100)
     if ctx.message.spam.score > 100 then
         return {action = "reject"}
     end

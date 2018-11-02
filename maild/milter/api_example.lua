@@ -170,7 +170,7 @@ function milter_hook(ctx)
         modifier.repack_message = modifier.repack_message .. msg
     end
 
-    -- Check the message for spam and modify it, if spam score is exceed 100
+    -- Check the message for spam and modify it, if spam score exceeds 100
     if ctx.message.spam.score > 100 then
         -- Modify value of Subject header
         local old_value = ctx.message.header.value("Subject") or ""
