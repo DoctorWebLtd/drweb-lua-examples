@@ -1,6 +1,6 @@
 --
 -- Rules for email messages processing in Lua used by Dr.Web MailD 11.1
--- Short MailD Lua API summary (for Milter protocol)
+-- Short MailD Lua API summary (for Rspamd protocol)
 --
 
 -- Provided auxiliary modules
@@ -24,11 +24,11 @@ local lookup = require "drweb.lookup"
 -- Contains function to get data from external storages via LookupD (AD, ldap, ... etc)
      -- lookup.lookup(request, parameters)
 
--- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
+-- Entry point to check email message sent to the Dr.Web MailD by Rspamd protocol
 function rspamd_hook(ctx)
   -- In Lua, object-oriented programming is implemented using tables.
   -- More about tables you can read here: https://www.lua.org/pil/2.5.html
-  -- Argument ctx (MilterContext) describes the email message to check
+  -- Argument ctx (RspamdContext) describes the email message to check
   -- ctx provides the following fields:
        -- sender    (table)            -- sender of the message
            -- hostname     (string)
@@ -94,11 +94,9 @@ function rspamd_hook(ctx)
 
     drweb.notice("Sender info:")
     drweb.notice(" -> hostname: " .. ctx.sender.hostname)
-    drweb.notice(" -> family: " .. ctx.sender.family)
-    drweb.notice(" -> port: " .. ctx.sender.port)
     drweb.notice(" -> ip: " .. ctx.sender.ip)
 
-    -- Iterate throw array of recepients
+    -- Iterate throw array of recipients
     drweb.notice("Message rcpts:")
     for _, rcpt in ipairs(ctx.to) do
         drweb.notice(" -> " .. rcpt)
@@ -137,7 +135,7 @@ function rspamd_hook(ctx)
         symbols = {
                 {
                     name = "The message contains unwanted URL(s)",
-                    score = ctx.message.spam.score
+                    score = 200
                 }
             }
         }

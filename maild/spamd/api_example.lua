@@ -80,24 +80,6 @@ function spamd_report_hook(ctx)
            -- has_threat   (function)
            -- has_url      (function)
 
-  -- Now we can see the information we are interested in about the message.
-
-    -- Output message data to log of Dr.Web MailD on level "notice"
-    drweb.notice("SMTP HELO/EHLO: " .. ctx.helo)
-    drweb.notice("SMTP MAIL FROM: " .. ctx.from)
-
-    drweb.notice("Sender info:")
-    drweb.notice(" -> hostname: " .. ctx.sender.hostname)
-    drweb.notice(" -> family: " .. ctx.sender.family)
-    drweb.notice(" -> port: " .. ctx.sender.port)
-    drweb.notice(" -> ip: " .. ctx.sender.ip)
-
-    -- Iterate through array of recipients
-    drweb.notice("Message rcpts:")
-    for _, rcpt in ipairs(ctx.to) do
-        drweb.notice(" -> " .. rcpt)
-    end
-
     -- If message type is not multipart, output headers and body
     if #ctx.message.part == 0 then
         drweb.notice("Message HEADERS:")
