@@ -2,6 +2,9 @@
 -- Auxiliary Dr.Web Lua module providing common utilities
 local drweb = require "drweb"
 -- Lua module to work with SQLite3 (installed with drweb-luarocks)
+    -- How to:
+    -- If you already have the drweb-luarocks component installed pass this step, else install it from repository
+    -- /opt/drweb.com/bin/luarocks install lsqlite3
 local sqlite3 = require "lsqlite3"
 -- SQLite database file location
 local database = '/tmp/drweb.db'
