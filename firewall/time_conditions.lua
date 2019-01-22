@@ -1,47 +1,51 @@
 --
--- Rules for firewall processing in Lua used by Dr.Web Firewall 11.1
+-- Rules for network connections processing in Lua used by Dr.Web Firewall 11.1
 --
 
 -- Provided auxiliary modules
 local drweb = require "drweb"
 
+-- Entry point to check network connections
 function intercept_hook(ctx)
-    -- Don't check drweb connections
+    -- 1. Do not check Dr.Web processes' outgoing connections
     if ctx.divert == "output" and ctx.group == "drweb"
     then
+        -- Pass the connection
         return "pass"
     end
 
-    -- time rules access
+    -- 2. Other connections should be checked
+    -- The rule below allows connection if current time satisfies the specified condition 
+    
+    -- Condition for time is specified using cron record format (from 8 to 18 hours, from Mon to Fri)
     local datetime_rules = {
         worktime = "* 8-18 * * 1-5"
     }
     if ctx.divert == "forward" or ctx.divert == "input" then
-        -- allow connections if current time satisfies the condition of the rule (from 8 to 18 hours, from Mon to Fri)
+        -- If current time satisfies the condition, connection will be checked for threats
         if rules_processor(datetime_rules.worktime) then
             return "check"
         end
     end
 
-    -- default action
+    -- 3. Reject connection if all conditions above are false
     return "reject"
 end
 
 
+-- Auxiliary function.
+-- The function gets condition for date and time in cron record format and returns true if the current time satisfies the condition.
+-- Condition should be specified as a string using simplified cron format allows absolute values (10 14 * * *) and ranges (0 12-14 * * 1-5).
+-- Fields of the string are as follows:
+-- * * * * *
+-- | | | | |
+-- | | | | ----- Day of week (0 - 6, where 0 is Sunday)
+-- | | | ------- Month (1 - 12)
+-- | | --------- Day (1 - 31)
+-- | ----------- Hours (0 - 23)
+-- ------------- Minutes (0 - 59)
+
 function rules_processor(cron)
-    --
-    -- Function get rule in cron based format and return true if current datetime satisfies the condition of the rule otherwise return false
-    -- Rules based on simplyfied cron format understands absolute values(10 14 * * *) and ranges (0 12-14 * * 1-5)
-    --
-    -- * * * * *
-    -- - - - - -
-    -- | | | | |
-    -- | | | | ----- Day of week (0 - 6) (Sunday =0)
-    -- | | | ------- Month (1 - 12)
-    -- | | --------- Day (1 - 31)
-    -- | ----------- Hour (0 - 23)
-    -- ------------- Minutes (0 - 59)
-    --
 
     local function check(now, rule)
         if rule == "*" then
@@ -74,4 +78,3 @@ function rules_processor(cron)
     end
 
 end
-
