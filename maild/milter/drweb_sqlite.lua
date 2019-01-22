@@ -2,7 +2,10 @@
 -- Auxiliary Dr.Web Lua module providing common utilities
 local drweb = require "drweb"
 -- Lua module to work with SQLite3 (installed with drweb-luarocks)
-sqlite3 = require "lsqlite3"
+    -- How to:
+    -- If you already have the drweb-luarocks component installed pass this step, else install it from repository
+    -- /opt/drweb.com/bin/luarocks install lsqlite3
+local sqlite3 = require "lsqlite3"
 -- SQLite database file location
 local database = '/tmp/drweb.db'
 
@@ -50,18 +53,11 @@ end
 -- Entry point to check email message sent to the Dr.Web MailD by Milter protocol
 function milter_hook(ctx)
 
-    local rcpts = {}
-
-    -- Iterate through array of recipients
-    for _, rcpt in ipairs(ctx.to) do
-        table.insert(rcpts, rcpt)
-    end
-
     local datetime = os.date()
     local mail_from = ctx.from
     local host = ctx.sender.hostname
     local ip = ctx.sender.ip
-    local mail_to = table.concat(rcpts, ", ")
+    local mail_to = table.concat(ctx.to, ", ")
 
     -- Insert info about each found threat into database and reject the message
     if ctx.message.has_threat() then

@@ -5,7 +5,6 @@
 -- Provided auxiliary modules
 local drweb = require "drweb"
 
-
 -- Entry point to check network connections
 function intercept_hook(ctx)
     -- 1. Do not check Dr.Web processes' outgoing connections
@@ -23,7 +22,7 @@ function intercept_hook(ctx)
         worktime = "* 8-18 * * 1-5"
     }
     if ctx.divert == "forward" or ctx.divert == "input" then
-        -- If current time satisfies the condition, connection will be checked for threats 
+        -- If current time satisfies the condition, connection will be checked for threats
         if rules_processor(datetime_rules.worktime) then
             return "check"
         end
@@ -53,7 +52,7 @@ function rules_processor(cron)
             return true
         elseif string.find(rule, "-") then
             local thresholds = string.gmatch(rule, '([^-]+)')
-            min_th, max_th = tonumber(thresholds()), tonumber(thresholds())
+            local min_th, max_th = tonumber(thresholds()), tonumber(thresholds())
             if tonumber(now) >= min_th and tonumber(now) <= max_th then
                 return true
             else
@@ -67,10 +66,10 @@ function rules_processor(cron)
     end
 
     local now_stamp = string.gmatch(os.date("%M %H %d %m %w"), '([^%s]+)')
-    now_min, now_hour, now_day, now_month, now_dow = now_stamp(), now_stamp(), now_stamp(), now_stamp(), now_stamp()
+    local now_min, now_hour, now_day, now_month, now_dow = now_stamp(), now_stamp(), now_stamp(), now_stamp(), now_stamp()
 
     local rule_stamp = string.gmatch(cron, '([^%s]+)')
-    rule_min, rule_hour, rule_day, rule_month, rule_dow = rule_stamp(), rule_stamp(), rule_stamp(), rule_stamp(), rule_stamp()
+    local rule_min, rule_hour, rule_day, rule_month, rule_dow = rule_stamp(), rule_stamp(), rule_stamp(), rule_stamp(), rule_stamp()
 
     if check(now_min, rule_min) and check(now_hour, rule_hour) and check(now_day, rule_day) and check(now_month, rule_month) and check(now_dow, rule_dow) then
         return true
