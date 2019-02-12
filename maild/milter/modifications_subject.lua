@@ -8,12 +8,7 @@ function milter_hook(ctx)
 
     -- Получаем тему письма из соответствующего заголовка
     -- Get the message' subject from the corresponding header
-    local headers = ctx.message.header.field
-    for i =1, #headers do
-       if headers[i].name == "Subject" then
-           subject = headers[i].value
-       end
-    end
+    local subject = ctx.message.header.value('Subject') or ''
     -- Проверяем, содержит ли сообщение угрозы, и отвергаем его, если это так
     -- Check if the message contains threats, reject it if so
     if ctx.message.has_threat() then
@@ -31,5 +26,5 @@ function milter_hook(ctx)
 
     -- Пропускаем сообщение, применив все сделанные модификации
     -- Accept the message and apply all the modifications
-    return {action = "accept", modifications = modifier.modifications()}
+    return {action = "accept"}
 end

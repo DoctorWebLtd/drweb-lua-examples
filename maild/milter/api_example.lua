@@ -14,6 +14,7 @@ local drweb = require "drweb"
      -- drweb.error("this is an error message")
      -- drweb.sleep(time) -- pause execution for time seconds
      -- drweb.async(func) -- async start of specified function
+     -- drweb.load_set -- load array from file
 
 local dns = require "drweb.dnsxl"
   -- Contains functions to check IP (URL) on DNSxL  (SURBL) servers
@@ -126,9 +127,14 @@ function milter_hook(ctx)
     -- Else disassemble it in parts
     else
         drweb.notice("Message parts:")
+        drweb.notice("Part 0 HEADERS:")
+        local headers = ctx.message.header.field
+        for i =1, #headers do
+            drweb.notice(" -> " .. headers[i].name .. ": " .. headers[i].value)
+        end
         for index, part in ipairs(ctx.message.part) do
             drweb.notice("Part " .. index .. " HEADERS:")
-            local headers = ctx.message.header.field
+            local headers = part.header.field
             for i =1, #headers do
                 drweb.notice(" -> " .. headers[i].name .. ": " .. headers[i].value)
             end
@@ -181,7 +187,7 @@ function milter_hook(ctx)
   -- The hook function must return response to MTA.
   -- If the response is 'accept' and there are scheduled modifications,
   -- the hook function should return them in order to they are applied.
-    return {action = "accept", modifications = modifier.modifications()}
+    return {action = "accept"}
 
     -- Available responses are:
     -- return {action = "accept"}
