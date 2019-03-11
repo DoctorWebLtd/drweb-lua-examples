@@ -24,7 +24,7 @@ function milter_hook(ctx)
     -- Stop checks if mail_from matchs one of the patterns loaded from file
     for pattern, _ in pairs(blacklist) do
         if regex.match(pattern, ctx.from, regex.ignore_case) then
-            return {action = "reject", "Blacklist"}
+            return {action = "reject", message = "Blacklist"}
         end
     end
 
